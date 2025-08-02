@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Queue Prioritization</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f7f7f7;
+      padding: 30px;
+    }
+    h2, h3 {
+      color: #333;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin-bottom: 30px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #0066cc;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #004999;
+    }
+    ol {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-width: 400px;
+      
+    }
+    li {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Queue Entry</h2>
+  <form id="queueForm">
+    <input type="text" id="qName" placeholder="Your Name" required />
+    <select id="urgency">
+      <option value="urgent">I have class soon</option>
+      <option value="normal">No class</option>
+    </select>
+    <label for="dateInput"><br><br>Select Date:</label>
+    <input type="date" id="dateInput" required />
+    <br><br>
+    <button type="submit">Join Queue</button>
+  </form>
+
+  <h3>Queue Order for <span id="displayDate"></span></h3>
+  <ol id="queueList"></ol>
+
+  <script>
+    const queueForm = document.getElementById('queueForm');
+    const queueList = document.getElementById('queueList');
+    const dateInput = document.getElementById('dateInput');
+    const displayDate = document.getElementById('displayDate');
+
+    // Get current Indian date
+    function getIndianDateStr() {
+      const indiaTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+      const d = new Date(indiaTime);
+      return d.toISOString().split('T')[0]; // format: YYYY-MM-DD
+    }
+
+    // Set default date input to today's date
+    const today = getIndianDateStr();
+    dateInput.value = today;
+    displayDate.textContent = today;
+
+    function renderQueue(date) {
+      const stored = localStorage.getItem(`queueData_${date}`);
+      const queue = stored ? JSON.parse(stored) : [];
+
+      queueList.innerHTML = '';
+      const sortedQueue = queue.sort((a, b) => a.urgency === 'urgent' ? -1 : 1);
+      sortedQueue.forEach(person => {
+        const li = document.createElement('li');
+        li.textContent = `${person.name} - ${person.urgency}`;
+        
+        queueList.appendChild(li);
+      });
+    }
+
+    queueForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('qName').value.trim();
+      const urgency = document.getElementById('urgency').value;
+      const selectedDate = dateInput.value;
+
+      const person = { name, urgency };
+      const stored = localStorage.getItem(`queueData_${selectedDate}`);
+      const queue = stored ? JSON.parse(stored) : [];
+
+      queue.push(person);
+      localStorage.setItem(`queueData_${selectedDate}`, JSON.stringify(queue));
+      renderQueue(selectedDate);
+      queueForm.reset();
+      dateInput.value = selectedDate;
+    });
+
+    dateInput.addEventListener('change', function() {
+      const selectedDate = dateInput.value;
+      displayDate.textContent = selectedDate;
+      renderQueue(selectedDate);
+    });
+
+    renderQueue(today);
+  </script>
+</body>
+</html>

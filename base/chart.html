@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Mess Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 40px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 30px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .box {
+      padding: 30px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-decoration: none;
+      color: #333;
+      font-size: 1.2em;
+      font-weight: bold;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .box span {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    footer {
+      margin-top: 50px;
+      font-size: 0.9em;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🍽️ Smart Mess Management System</h1>
+
+  <div class="container">
+    <a href="breakfast.html" class="box">
+      <span>🥞</span>
+      Breakfast
+    </a>
+    <a href="lunch.html" class="box">
+      <span>🍛</span>
+      Lunch
+    </a>
+    <a href="snacks.html" class="box">
+      <span>🍪</span>
+      Snacks
+    </a>
+    <a href="dinner.html" class="box">
+      <span>🍲</span>
+      Dinner
+    </a>
+  </div>
+
+  <footer>
+    &copy; 2025 Smart Mess System | Built by Quantum 🚀
+  </footer>
+
+</body>
+</html>

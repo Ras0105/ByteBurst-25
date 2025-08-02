@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Breakfast Chart – Smart Mess</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fefefe;
+      padding: 30px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+    input[type="text"], input[type="number"], input[type="date"] {
+      padding: 8px;
+      margin: 5px;
+      width: 200px;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      margin-top: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    canvas {
+      margin-top: 30px;
+      max-width: 700px;
+      width: 100%;
+    }
+    a {
+      text-decoration: none;
+      color: #007bff;
+      display: inline-block;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🥞 Breakfast Dish Popularity – <span id="todayDate"></span></h2>
+
+  <label><b>📅 Select Date:</b></label>
+  <input type="date" id="datePicker">
+  <button onclick="loadChart()">Load</button>
+  <br><br>
+
+  <input type="text" id="dishName" placeholder="Dish Name" />
+  <input type="number" id="dishVotes" placeholder="Votes / Count" />
+  <br>
+  <button onclick="addDish()">Add to Chart</button>
+
+  <canvas id="breakfastChart"></canvas>
+
+  <a href="chart.html">⬅️ Back</a>
+
+  <script>
+    let currentDate = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD local time
+    document.getElementById('todayDate').textContent = currentDate;
+    document.getElementById('datePicker').value = currentDate;
+
+    const ctx = document.getElementById('breakfastChart').getContext('2d');
+    let chart; // Chart.js instance
+
+    function loadChart() {
+      currentDate = document.getElementById('datePicker').value;
+      document.getElementById('todayDate').textContent = currentDate;
+
+      const storageKey = `smartmess_breakfast_${currentDate}`;
+      const stored = JSON.parse(localStorage.getItem(storageKey)) || { labels: [], data: [], colors: [] };
+
+      if (chart) chart.destroy(); // remove previous chart
+
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: stored.labels,
+          datasets: [{
+            label: 'Votes',
+            data: stored.data,
+            backgroundColor: stored.colors,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Votes / Students'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function getRandomColor() {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+    function addDish() {
+      const name = document.getElementById('dishName').value.trim();
+      const votes = parseInt(document.getElementById('dishVotes').value);
+
+      if (!name || isNaN(votes)) {
+        alert("Please enter valid dish name and vote count.");
+        return;
+      }
+
+      const color = getRandomColor();
+      chart.data.labels.push(name);
+      chart.data.datasets[0].data.push(votes);
+      chart.data.datasets[0].backgroundColor.push(color);
+      chart.update();
+
+      const storageKey = `smartmess_breakfast_${currentDate}`;
+      const savedData = {
+        labels: chart.data.labels,
+        data: chart.data.datasets[0].data,
+        colors: chart.data.datasets[0].backgroundColor
+      };
+      localStorage.setItem(storageKey, JSON.stringify(savedData));
+
+      document.getElementById('dishName').value = '';
+      document.getElementById('dishVotes').value = '';
+    }
+
+    loadChart(); // Initial chart load on page load
+  </script>
+
+</body>
+</html>

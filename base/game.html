@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🎡 Mess Spin the Wheel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f0f0f0;
+      padding: 50px;
+    }
+    .wheel {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      border: 10px solid #444;
+      margin: 30px auto;
+      position: relative;
+      overflow: hidden;
+      transition: transform 4s ease-out;
+    }
+    .wheel div {
+      width: 50%;
+      height: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: 0% 0%;
+      background: #fff;
+      color: #000;
+      text-align: left;
+      padding-left: 20px;
+      font-weight: bold;
+    }
+    .arrow {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 30px solid red;
+      margin: 0 auto;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🎉 Spin the Wheel & Win Mess Rewards!</h2>
+  <div class="arrow"></div>
+  <div class="wheel" id="wheel">
+    <div style="transform: rotate(0deg); background: #f9c74f;">Free Sweet</div>
+    <div style="transform: rotate(60deg); background: #f9844a;">Skip Queue</div>
+    <div style="transform: rotate(120deg); background: #90be6d;">1 Free Meal</div>
+    <div style="transform: rotate(180deg); background: #577590;">Front Seat</div>
+    <div style="transform: rotate(240deg); background: #f94144;">Extra Chapati</div>
+    <div style="transform: rotate(300deg); background: #43aa8b;">Free Salad</div>
+  </div>
+
+  <button onclick="spin()">Spin Now</button>
+  <h3 id="result"></h3>
+
+  <script>
+    let wheel = document.getElementById("wheel");
+    let result = document.getElementById("result");
+    let spinning = false;
+
+    function spin() {
+      if (spinning) return;
+      spinning = true;
+      result.textContent = "";
+
+      let deg = Math.floor(3600 + Math.random() * 720); // spin at least 10 times
+      wheel.style.transform = `rotate(${deg}deg)`;
+
+      setTimeout(() => {
+        let actualDeg = deg % 360;
+        let segment = Math.floor(actualDeg / 60);
+        let prizes = [
+          "🎁 Free Sweet",
+          "⏱️ Skip Queue Pass",
+          "🍛 1 Free Meal",
+          "🪑 Front Seat Access",
+          "🥪 Extra Chapati",
+          "🥗 Free Salad"
+        ];
+        result.textContent = `You won: ${prizes[5 - segment] || prizes[0]}!`;
+        spinning = false;
+      }, 4000);
+    }
+  </script>
+
+</body>
+</html>
