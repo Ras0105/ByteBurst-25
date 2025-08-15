@@ -1,0 +1,122 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+
+header {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+.btn btn-light{
+    background-color: #28a745;
+}
+.rating {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.rating .fas {
+    color: gold;
+}
+
+.rating .far {
+    color: #ddd;
+}
+
+.queue-item {
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+}
+
+.queue-item.priority {
+    background-color: #d4edda;
+    border-left: 4px solid #28a745;
+}
+
+.wheel-container {
+    margin: 0 auto;
+    width: 250px;
+    height: 250px;
+}
+
+#wheelCanvas {
+    display: block;
+    margin: 0 auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    header .d-flex {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    header nav {
+        margin-top: 15px;
+    }
+    
+    header .nav {
+        justify-content: center;
+    }
+    
+    #loginBtn {
+        margin-top: 15px;
+    }
+}
+
+/* Animation for spin wheel */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(3600deg); }
+}
+
+.spin-animation {
+    animation: spin 4s cubic-bezier(0.17, 0.67, 0.21, 0.99) forwards;
+}
+
+.analytics-box {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.analytics-bar {
+  height: 16px;
+  background-color:  #7fb24f;
+  border-radius: 10px;
+}
+.analytics-label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+.analytics-bar-container {
+  background-color: #e9ecef;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.analytics-value {
+  font-size: 0.85rem;
+  color: #333;
+  margin-top: 2px;
+}

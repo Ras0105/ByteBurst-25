@@ -1,0 +1,80 @@
+/* === Fix Sidebar & Main layout responsiveness === */
+@media (max-width: 992px) {
+  .flex.min-h-screen {
+    flex-direction: column;
+  }
+
+  aside {
+    width: 100% !important;
+    border-right: none !important;
+  }
+
+  main.flex-1 {
+    padding: 1rem !important;
+  }
+
+  .flex.justify-between {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 1rem;
+  }
+
+  main input[type="text"] {
+    width: 100%;
+  }
+}
+
+/* === Image Card Responsive Fix === */
+@media (max-width: 768px) {
+  .image-card {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .image-card img {
+    object-fit: contain !important;
+    height: auto !important;
+    width: 100% !important;
+  }
+}
+
+/* === Header/Navbar Fix for Small Screens === */
+@media (max-width: 768px) {
+  header .d-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  header nav ul {
+    flex-direction: column;
+    padding-left: 0 !important;
+  }
+
+  #loginBtn {
+    align-self: flex-end;
+  }
+}
+
+/* === Footer Fix === */
+@media (max-width: 768px) {
+  footer .row {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  footer .col-md-6,
+  footer .col-md-3 {
+    width: 100% !important;
+    margin-bottom: 1rem;
+  }
+
+  footer ul li {
+    display: block;
+    margin: 0.5rem 0;
+  }
+
+  footer hr {
+    margin-top: 2rem;
+  }
+}

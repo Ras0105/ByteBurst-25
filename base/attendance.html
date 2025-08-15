@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Mess – Meal Opt-Out System</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 550px;
+    }
+
+    h2, h3 {
+      color: #333;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 8px;
+    }
+
+    input[type="text"], input[type="date"], select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    li {
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background-color: #f1f1f1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 15px;
+    }
+
+    .status-opted {
+      color: #c62828;
+      font-weight: bold;
+    }
+
+    .status-eat {
+      color: #2e7d32;
+      font-weight: bold;
+    }
+
+    .date-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="date-row">
+      <h2>Smart Mess Attendance</h2>
+      <input type="date" id="selectedDate" />
+    </div>
+
+    <form id="mealForm">
+      <select id="mealType" required>
+        <option value="" disabled selected>Select Meal Type</option>
+        <option value="Breakfast">🍳 Breakfast</option>
+        <option value="Lunch">🍱 Lunch</option>
+        <option value="Snacks">☕ Snacks</option>
+        <option value="Dinner">🍽️ Dinner</option>
+      </select>
+      <input type="text" id="name" placeholder="Enter your name" required />
+      <label>
+        <input type="checkbox" id="optout" />
+        I will NOT eat this meal
+      </label>
+      <button type="submit">Submit</button>
+    </form>
+
+    <h3>Responses for <span id="todayDate"></span> – <span id="currentMeal"></span></h3>
+    <ul id="logList"></ul>
+    <div id="attendanceSummary" style="margin-top: 20px; text-align:center; font-weight: bold;"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('mealForm');
+    const logList = document.getElementById('logList');
+    const todayDateDisplay = document.getElementById('todayDate');
+    const selectedDateInput = document.getElementById('selectedDate');
+    const mealTypeSelect = document.getElementById('mealType');
+    const currentMealDisplay = document.getElementById('currentMeal');
+
+    const today = new Date().toISOString().split('T')[0];
+    selectedDateInput.value = today;
+
+    const MEALS = ["Breakfast", "Lunch", "Snacks", "Dinner"];
+    const TOTAL_STUDENTS = 200;
+
+    function getISTTime() {
+      return new Date().toLocaleTimeString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+    }
+
+    function getStorageKey(dateStr, mealType) {
+      return `mealData-${dateStr}-${mealType}`;
+    }
+
+    function loadData(dateStr, mealType) {
+      return JSON.parse(localStorage.getItem(getStorageKey(dateStr, mealType))) || [];
+    }
+
+    function saveData(dateStr, mealType, data) {
+      localStorage.setItem(getStorageKey(dateStr, mealType), JSON.stringify(data));
+    }
+
+    function renderData(dateStr, mealType) {
+      logList.innerHTML = '';
+      todayDateDisplay.textContent = dateStr;
+      currentMealDisplay.textContent = mealType || 'All Meals';
+
+      let uniqueNames = new Set();
+      let willEatCount = 0;
+      let optedOutCount = 0;
+
+      const renderEntries = (meal, data) => {
+        if (data.length > 0) {
+          const heading = document.createElement('h4');
+          heading.textContent = meal;
+          heading.style.marginTop = "20px";
+          heading.style.color = "#007bff";
+          logList.appendChild(heading);
+
+          const latestEntries = {};
+          data.forEach(entry => {
+            latestEntries[entry.name.toLowerCase()] = entry; // Ensuring case-insensitive uniqueness
+          });
+
+          Object.values(latestEntries).forEach(entry => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+              <span>${entry.name}</span>
+              <span class="${entry.status === 'Opted Out' ? 'status-opted' : 'status-eat'}">
+                ${entry.status} (${entry.time})
+              </span>
+            `;
+            logList.appendChild(li);
+
+            uniqueNames.add(entry.name.toLowerCase());
+            if (entry.status === 'Will Eat') willEatCount++;
+            else optedOutCount++;
+          });
+        }
+      };
+
+      if (!mealType) {
+        MEALS.forEach(meal => {
+          const data = loadData(dateStr, meal);
+          renderEntries(meal, data);
+        });
+      } else {
+        const data = loadData(dateStr, mealType);
+        renderEntries(mealType, data);
+      }
+
+      const absentCount = TOTAL_STUDENTS - uniqueNames.size;
+      document.getElementById('attendanceSummary').innerHTML = `
+        ✅ <strong>Total Unique Responses:</strong> ${uniqueNames.size}<br>
+        🟢 <strong>Will Eat:</strong> ${willEatCount} &nbsp;&nbsp;
+        🔴 <strong>Opted Out:</strong> ${optedOutCount}<br>
+        ⚫ <strong>Not Responded:</strong> ${absentCount}<br><br>
+        ✅<strong>PRESENT: </strong>${uniqueNames.size}<br>
+        ❌<strong>ABSENT: </strong>${absentCount}
+      `;
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const optout = document.getElementById('optout').checked;
+      const dateStr = selectedDateInput.value;
+      const mealType = mealTypeSelect.value;
+
+      if (!name || !dateStr || !mealType) return;
+
+      const entry = {
+        name,
+        status: optout ? 'Opted Out' : 'Will Eat',
+        time: getISTTime()
+      };
+
+      let data = loadData(dateStr, mealType);
+
+      // Replace old entry if same name already exists
+      const nameLower = name.toLowerCase();
+      const index = data.findIndex(e => e.name.toLowerCase() === nameLower);
+      if (index !== -1) {
+        data[index] = entry;
+      } else {
+        data.push(entry);
+      }
+
+      saveData(dateStr, mealType, data);
+      renderData(dateStr, mealType);
+      form.reset();
+      mealTypeSelect.selectedIndex = 0;
+    });
+
+    selectedDateInput.addEventListener('change', () => {
+      const dateStr = selectedDateInput.value;
+      const mealType = mealTypeSelect.value;
+      renderData(dateStr, mealType);
+    });
+
+    mealTypeSelect.addEventListener('change', () => {
+      const dateStr = selectedDateInput.value;
+      const mealType = mealTypeSelect.value;
+      renderData(dateStr, mealType);
+    });
+
+    renderData(today);
+  </script>
+</body>
+</html>

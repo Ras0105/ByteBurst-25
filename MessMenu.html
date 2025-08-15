@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>College Mess Menu</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background-color: #f0f8ff;
+      padding: 20px;
+      color: #2c3e50;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+      padding: 15px;
+      background-color: rgba(52, 152, 219, 0.1);
+      border-radius: 10px;
+    }
+    .header h1 {
+      color: #2980b9;
+      margin-bottom: 5px;
+      font-size: 28px;
+    }
+    .controls {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.1);
+      margin-bottom: 25px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      border: 1px solid #d4e6f1;
+    }
+    .select-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 15px;
+      align-items: center;
+    }
+    label {
+      font-weight: 600;
+      color: #2980b9;
+      min-width: 80px;
+    }
+    select {
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #d4e6f1;
+      background-color: #f5fafd;
+      font-size: 16px;
+      flex-grow: 1;
+      max-width: 300px;
+      color: #2c3e50;
+    }
+    select:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+    button {
+      padding: 12px 25px;
+      border-radius: 8px;
+      background-color: #3498db;
+      color: white;
+      cursor: pointer;
+      border: none;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.2s;
+      margin-top: 10px;
+      box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
+    }
+    button:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    button:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    .menu-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .menu-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    .item-box {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      color: #2c3e50;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 180px;
+      transition: all 0.3s ease;
+      border: 1px solid #e1f0fa;
+    }
+    .item-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(52, 152, 219, 0.15);
+      border-color: #3498db;
+    }
+    .stars {
+      margin-top: 15px;
+      display: flex;
+      gap: 5px;
+    }
+    .star {
+      cursor: pointer;
+      font-size: 24px;
+      color: #d4e6f1;
+      transition: color 0.2s;
+    }
+    .star:hover {
+      color: #f1c40f;
+    }
+    .star.selected {
+      color: #f1c40f;
+      text-shadow: 0 0 5px rgba(241, 196, 15, 0.5);
+    }
+    .item-icon {
+      font-size: 50px;
+      margin-bottom: 15px;
+      color: #3498db;
+      text-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+    }
+    .item-name {
+      text-align: center;
+      margin: 10px 0;
+      font-size: 15px;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      color: #34495e;
+    }
+    .no-menu {
+      display: none;
+      padding: 25px;
+      background: #f8d7da;
+      border-radius: 10px;
+      color: #721c24;
+      font-weight: bold;
+      text-align: center;
+      max-width: 800px;
+      margin: 20px auto;
+      border: 1px solid #f5c6cb;
+    }
+    .day-title {
+      text-align: center;
+      color: #2980b9;
+      margin: 30px 0 15px;
+      font-size: 24px;
+      font-weight: 600;
+      text-shadow: 0 1px 2px rgba(41, 128, 185, 0.2);
+    }
+    @media (max-width: 600px) {
+      .select-group {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      select {
+        max-width: 100%;
+        width: 100%;
+      }
+      .item-box {
+        width: 140px;
+        padding: 15px;
+      }
+      .item-icon {
+        font-size: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>College Mess Menu</h1>
+  </div>
+
+  <div class="controls">
+    <div class="select-group">
+      <label for="day">Day:</label>
+      <select id="day">
+        <option value="">-- Select Day --</option>
+        <option value="Monday">Monday</option>
+        <option value="Tuesday">Tuesday</option>
+        <option value="Wednesday">Wednesday</option>
+        <option value="Thursday">Thursday</option>
+        <option value="Friday">Friday</option>
+        <option value="Saturday">Saturday</option>
+        <option value="Sunday">Sunday</option>
+      </select>
+    </div>
+
+    <div class="select-group">
+      <label for="meal">Meal:</label>
+      <select id="meal" disabled>
+        <option value="">-- Select Meal --</option>
+        <option value="Breakfast">Breakfast</option>
+        <option value="Lunch">Lunch</option>
+        <option value="Tea & Snacks">Tea & Snacks</option>
+        <option value="Dinner">Dinner</option>
+      </select>
+    </div>
+
+    <div style="text-align: center;">
+      <button id="showBtn" disabled>Show Menu</button>
+    </div>
+  </div>
+
+  <div class="menu-container">
+    <div class="no-menu" id="errorMsg"></div>
+    <div id="menu" class="menu-items" style="display: none;"></div>
+  </div>
+
+  <script>
+    // Icon mapping using emoji
+    const iconMap = {
+      "Idli+Chutney+Sambhar": "🍛",
+      "Tea/Coffee": "☕",
+      "Milk": "🥛",
+      "Seasonal Fruit": "🍎",
+      "Arhar dal": "🥘",
+      "Aalu Bhujia": "🥔",
+      "Salad": "🥗",
+      "Rice": "🍚",
+      "Chapati": "🫓",
+      "Veg Raita": "🥣",
+      "Biscuits": "🍪",
+      "Tedhe Medhe": "🥨",
+      "Aam Panna": "🧃",
+      "Mixed Dal": "🥘",
+      "Lauki Sabji": "🥒",
+      "Pickle": "🥒",
+      "Ice Cream": "🍨",
+      "Stuffed Parantha": "🥙",
+      "Sabji": "🥘",
+      "Butter": "🧈",
+      "Dal Tadka": "🥘",
+      "Kathal Sabji": "🍆",
+      "Curd": "🥛",
+      "Chola Samosa": "🥟",
+      "Soyabean Sabji": "🥘",
+      "Dal Makhani": "🥘",
+      "Sewal": "🍲",
+      "Methi Parantha": "🥙",
+      "Boiled Eggs": "🥚",
+      "Pulao": "🍛",
+      "White Chana": "🧆",
+      "Boondi Raita": "🥣",
+      "Aalu Bora Sabji": "🥔",
+      "Halwa": "🧆",
+      "Poha": "🍚",
+      "Bread Butter": "🍞",
+      "Rajma": "🧆",
+      "Bhindi": "🥒",
+      "Pakora": "🍤",
+      "Chole": "🧆",
+      "Sweet": "🍬",
+      "Upma": "🍲",
+      "Aalu Gobi": "🥔",
+      "Namkeen": "🥨",
+      "Juice": "🧃",
+      "Kofta Curry": "🍛",
+      "Kheer": "🍚",
+      "Chole Bhature": "🥙",
+      "Paneer Sabji": "🧀",
+      "Cold Drink": "🧃",
+      "Vegetable Biryani": "🍛",
+      "Puri Sabji": "🥙",
+      "Mixed Veg": "🥗",
+      "Maggie": "🍜",
+      "Paneer Curry": "🧀",
+      "Gulab Jamun": "🍡"
+    };
+
+    // Menu data
+    const fullMenu = {
+      "Monday": {
+        "Breakfast": ["Idli+Chutney+Sambhar", "Tea/Coffee", "Milk", "Seasonal Fruit"],
+        "Lunch": ["Arhar dal", "Aalu Bhujia", "Salad", "Rice", "Chapati", "Veg Raita"],
+        "Tea & Snacks": ["Biscuits", "Tedhe Medhe", "Aam Panna", "Tea"],
+        "Dinner": ["Mixed Dal", "Lauki Sabji", "Rice", "Chapati", "Salad", "Pickle", "Ice Cream"]
+      },
+      "Tuesday": {
+        "Breakfast": ["Stuffed Parantha", "Sabji", "Butter", "Tea/Coffee", "Milk", "Seasonal Fruit"],
+        "Lunch": ["Dal Tadka", "Kathal Sabji", "Curd", "Rice", "Chapati", "Salad", "Pickle"],
+        "Tea & Snacks": ["Chola Samosa", "Chutney", "Tea/Coffee"],
+        "Dinner": ["Soyabean Sabji", "Dal Makhani", "Rice", "Chapati", "Salad", "Pickle", "Sewal"]
+      },
+      "Wednesday": {
+        "Breakfast": ["Methi Parantha", "Boiled Eggs", "Curd", "Milk", "Tea/Coffee", "Fruit"],
+        "Lunch": ["Pulao", "White Chana", "Boondi Raita", "Chapati", "Salad", "Pickle"],
+        "Tea & Snacks": ["Black Chana", "Rasna"],
+        "Dinner": ["Aalu Bora Sabji", "Mixed Dal", "Rice", "Chapati", "Halwa", "Salad", "Pickle"]
+      },
+      "Thursday": {
+        "Breakfast": ["Poha", "Bread Butter", "Milk", "Tea/Coffee", "Fruit"],
+        "Lunch": ["Rajma", "Bhindi", "Rice", "Chapati", "Salad", "Curd"],
+        "Tea & Snacks": ["Pakora", "Chutney", "Tea"],
+        "Dinner": ["Chole", "Pulao", "Chapati", "Salad", "Pickle", "Sweet"]
+      },
+      "Friday": {
+        "Breakfast": ["Upma", "Chutney", "Tea/Coffee", "Milk", "Fruit"],
+        "Lunch": ["Dal Fry", "Aalu Gobi", "Rice", "Chapati", "Salad", "Raita"],
+        "Tea & Snacks": ["Namkeen", "Juice", "Tea"],
+        "Dinner": ["Kofta Curry", "Rice", "Chapati", "Salad", "Pickle", "Kheer"]
+      },
+      "Saturday": {
+        "Breakfast": ["Chole Bhature", "Tea/Coffee", "Milk", "Fruit"],
+        "Lunch": ["Dal", "Paneer Sabji", "Rice", "Chapati", "Salad", "Raita"],
+        "Tea & Snacks": ["Biscuits", "Cold Drink", "Tea"],
+        "Dinner": ["Vegetable Biryani", "Raita", "Salad", "Pickle", "Sweet"]
+      },
+      "Sunday": {
+        "Breakfast": ["Puri Sabji", "Tea/Coffee", "Milk", "Fruit"],
+        "Lunch": ["Dal Makhani", "Mixed Veg", "Rice", "Chapati", "Salad", "Curd"],
+        "Tea & Snacks": ["Maggie", "Tea"],
+        "Dinner": ["Paneer Curry", "Rice", "Chapati", "Salad", "Pickle", "Gulab Jamun"]
+      }
+    };
+
+    // DOM elements
+    const daySelect = document.getElementById('day');
+    const mealSelect = document.getElementById('meal');
+    const showBtn = document.getElementById('showBtn');
+    const menuDiv = document.getElementById('menu');
+    const errorMsg = document.getElementById('errorMsg');
+
+    // Initialize
+    localStorage.setItem('messMenuData', JSON.stringify(fullMenu));
+
+    // Event listeners
+    daySelect.addEventListener('change', function() {
+      if (this.value) {
+        mealSelect.disabled = false;
+        errorMsg.style.display = 'none';
+      } else {
+        mealSelect.disabled = true;
+        mealSelect.value = '';
+        showBtn.disabled = true;
+        menuDiv.style.display = 'none';
+      }
+    });
+
+    mealSelect.addEventListener('change', function() {
+      showBtn.disabled = !(daySelect.value && this.value);
+      errorMsg.style.display = 'none';
+    });
+
+    showBtn.addEventListener('click', function() {
+      if (!daySelect.value || !mealSelect.value) {
+        errorMsg.textContent = 'Please select both day and meal first';
+        errorMsg.style.display = 'block';
+        menuDiv.style.display = 'none';
+        return;
+      }
+      showMenu();
+    });
+
+    function showMenu() {
+      const day = daySelect.value;
+      const meal = mealSelect.value;
+      
+      // Clear any previous day titles
+      const prevTitles = document.querySelectorAll('.day-title');
+      prevTitles.forEach(title => title.remove());
+
+      errorMsg.style.display = 'none';
+      menuDiv.innerHTML = '';
+      menuDiv.style.display = 'flex';
+
+      const messMenu = JSON.parse(localStorage.getItem('messMenuData'));
+      const menuItems = messMenu[day][meal];
+
+      if (!menuItems || menuItems.length === 0) {
+        errorMsg.textContent = 'No menu available for this meal';
+        errorMsg.style.display = 'block';
+        menuDiv.style.display = 'none';
+        return;
+      }
+
+      // Add day title
+      const dayTitle = document.createElement('h2');
+      dayTitle.className = 'day-title';
+      dayTitle.textContent = `${day} - ${meal}`;
+      menuDiv.before(dayTitle);
+
+      menuItems.forEach((item) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'item-box';
+        
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'item-icon';
+        iconDiv.textContent = iconMap[item] || '🍽️';
+        
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'item-name';
+        nameDiv.textContent = item;
+        
+        const starsDiv = document.createElement('div');
+        starsDiv.className = 'stars';
+        
+        for (let i = 1; i <= 5; i++) {
+          const star = document.createElement('span');
+          star.className = 'star';
+          star.innerHTML = '★';
+          star.onclick = function() {
+            rateItem(this, i, day, meal, item);
+          };
+          starsDiv.appendChild(star);
+        }
+        
+        itemDiv.appendChild(iconDiv);
+        itemDiv.appendChild(nameDiv);
+        itemDiv.appendChild(starsDiv);
+        menuDiv.appendChild(itemDiv);
+        
+        // Load saved ratings
+        const ratings = JSON.parse(localStorage.getItem('menuRatings')) || {};
+        if (ratings[day] && ratings[day][meal] && ratings[day][meal][item]) {
+          const stars = itemDiv.querySelectorAll('.star');
+          const rating = ratings[day][meal][item];
+          stars.forEach((star, i) => {
+            star.classList.toggle('selected', i < rating);
+          });
+        }
+      });
+    }
+
+    function rateItem(el, rating, day, meal, item) {
+      const stars = el.parentElement.querySelectorAll('.star');
+      stars.forEach((star, i) => {
+        star.classList.toggle('selected', i < rating);
+      });
+
+      const ratings = JSON.parse(localStorage.getItem('menuRatings')) || {};
+      if (!ratings[day]) ratings[day] = {};
+      if (!ratings[day][meal]) ratings[day][meal] = {};
+      ratings[day][meal][item] = rating;
+      localStorage.setItem('menuRatings', JSON.stringify(ratings));
+    }
+  </script>
+</body>
+</html>
