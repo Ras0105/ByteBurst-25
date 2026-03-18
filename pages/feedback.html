@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Mess — Feedback</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+<div class="overlay" id="overlay"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><h1>Smart Mess</h1><span>Management System</span></div>
+  <nav class="sidebar-nav">
+    <span class="nav-section">Main</span>
+    <a href="../index.html" class="nav-link"><span class="icon">🏠</span> Dashboard</a>
+    <a href="menu.html" class="nav-link"><span class="icon">🍽️</span> Mess Menu</a>
+    <a href="attendance.html" class="nav-link"><span class="icon">✅</span> Attendance</a>
+    <span class="nav-section">Features</span>
+    <a href="feedback.html" class="nav-link active"><span class="icon">💬</span> Feedback</a>
+    <a href="queue.html" class="nav-link"><span class="icon">⏱️</span> Queue</a>
+    <a href="chart.html" class="nav-link"><span class="icon">📊</span> Analytics</a>
+    <a href="game.html" class="nav-link"><span class="icon">🎮</span> Rewards</a>
+  </nav>
+  <div class="sidebar-footer"><p>Team Quantum · ByteBurst'25</p></div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:14px">
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+      <span class="topbar-title">Feedback</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-date" id="topbar-date"></span>
+      <div class="avatar">S</div>
+    </div>
+  </header>
+
+  <div class="page-content">
+    <div class="page-heading">Share Your Experience</div>
+    <p class="page-sub">Your feedback helps us improve the mess for everyone.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1.1fr;gap:24px" id="fb-grid">
+
+      <!-- Form -->
+      <div class="card">
+        <div class="card-title">Submit Feedback</div>
+        <div class="card-sub">Takes less than a minute</div>
+
+        <form id="feedback-form">
+          <div class="form-group">
+            <label class="form-label">Your Name</label>
+            <input type="text" id="fb-name" class="form-control" placeholder="e.g. Rasshi Srivastav" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Feedback Type</label>
+            <select id="fb-type" class="form-control" required>
+              <option value="">— Select type —</option>
+              <option>Food Quality</option>
+              <option>Cleanliness</option>
+              <option>Staff Behavior</option>
+              <option>Service Time</option>
+              <option>Portion Size</option>
+              <option>Menu Variety</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Meal</label>
+            <select id="fb-meal" class="form-control" required>
+              <option value="">— Select meal —</option>
+              <option>Breakfast</option>
+              <option>Lunch</option>
+              <option>Snacks</option>
+              <option>Dinner</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rating</label>
+            <div id="form-stars" style="display:flex;gap:6px;font-size:1.6rem;margin-top:4px">
+              <span class="star" data-v="1">★</span>
+              <span class="star" data-v="2">★</span>
+              <span class="star" data-v="3">★</span>
+              <span class="star" data-v="4">★</span>
+              <span class="star" data-v="5">★</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Comments</label>
+            <textarea id="fb-comment" class="form-control" placeholder="Tell us what you liked or what we can improve..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%">Submit Feedback</button>
+        </form>
+      </div>
+
+      <!-- List -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div class="card-title">All Feedbacks</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="badge badge-orange" id="fb-count">0</span>
+            <button class="btn btn-sm btn-secondary" id="clear-btn">Clear All</button>
+          </div>
+        </div>
+        <div class="card-sub" style="margin-bottom:16px">Filter by meal:</div>
+        <div class="meal-chips" id="filter-chips">
+          <button class="chip active" data-meal="all">All</button>
+          <button class="chip" data-meal="Breakfast">Breakfast</button>
+          <button class="chip" data-meal="Lunch">Lunch</button>
+          <button class="chip" data-meal="Snacks">Snacks</button>
+          <button class="chip" data-meal="Dinner">Dinner</button>
+        </div>
+        <div class="feedback-list" id="feedback-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="../js/shared.js"></script>
+<script>
+let currentRating = 0;
+let currentFilter = 'all';
+
+// Star handler
+document.querySelectorAll('#form-stars .star').forEach(s => {
+  s.addEventListener('click', function() {
+    currentRating = parseInt(this.dataset.v);
+    document.querySelectorAll('#form-stars .star').forEach((st, i) => {
+      st.classList.toggle('lit', i < currentRating);
+    });
+  });
+});
+
+// Form submit
+document.getElementById('feedback-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const fb = {
+    name:    document.getElementById('fb-name').value.trim(),
+    type:    document.getElementById('fb-type').value,
+    meal:    document.getElementById('fb-meal').value,
+    rating:  currentRating,
+    comment: document.getElementById('fb-comment').value.trim(),
+    time:    getIST()
+  };
+  Store.push('feedbacks', fb);
+  e.target.reset();
+  currentRating = 0;
+  document.querySelectorAll('#form-stars .star').forEach(s => s.classList.remove('lit'));
+  renderFeedbacks();
+  showToast('Feedback submitted! 🎉');
+});
+
+// Filter chips
+document.querySelectorAll('#filter-chips .chip').forEach(c => {
+  c.addEventListener('click', function() {
+    document.querySelectorAll('#filter-chips .chip').forEach(x => x.classList.remove('active'));
+    this.classList.add('active');
+    currentFilter = this.dataset.meal;
+    renderFeedbacks();
+  });
+});
+
+// Clear
+document.getElementById('clear-btn').addEventListener('click', () => {
+  if (confirm('Clear all feedbacks?')) {
+    Store.set('feedbacks', []);
+    renderFeedbacks();
+    showToast('Cleared all feedbacks');
+  }
+});
+
+function ratingStars(r) {
+  return [1,2,3,4,5].map(i => `<span style="color:${i<=r?'#f0a500':'#d4c4b0'}">★</span>`).join('');
+}
+
+function renderFeedbacks() {
+  const list  = document.getElementById('feedback-list');
+  const count = document.getElementById('fb-count');
+  const all   = Store.get('feedbacks') || [];
+  const filtered = currentFilter === 'all' ? all : all.filter(f => f.meal === currentFilter);
+  count.textContent = all.length;
+
+  list.innerHTML = '';
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state"><div class="emoji">💬</div><p>No feedbacks yet</p></div>';
+    return;
+  }
+  [...filtered].reverse().forEach(fb => {
+    const el = document.createElement('div');
+    el.className = 'feedback-item';
+    el.innerHTML = `
+      <div class="feedback-header">
+        <span class="feedback-name">${fb.name}</span>
+        <span style="font-size:0.9rem">${ratingStars(fb.rating||0)}</span>
+      </div>
+      <div class="feedback-body">${fb.comment}</div>
+      <div class="feedback-tags">
+        <span class="badge badge-orange">${fb.meal}</span>
+        <span class="badge badge-blue">${fb.type}</span>
+        <span style="font-size:0.72rem;color:var(--text-3);margin-left:auto">${fb.time||''}</span>
+      </div>`;
+    list.appendChild(el);
+  });
+}
+
+// Responsive
+function responsive() {
+  const g = document.getElementById('fb-grid');
+  g.style.gridTemplateColumns = window.innerWidth < 900 ? '1fr' : '1fr 1.1fr';
+}
+window.addEventListener('resize', responsive);
+responsive();
+renderFeedbacks();
+</script>
+</body>
+</html>

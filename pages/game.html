@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Mess — Rewards</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+    #wheelCanvas { display: block; margin: 0 auto; cursor: pointer; }
+    .prize-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.875rem;
+    }
+    .prize-icon { font-size: 1.4rem; width: 36px; text-align: center; }
+    .won-badge {
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      margin-left: auto;
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); }
+      50%      { transform: scale(1.03); }
+    }
+    .pulse { animation: pulse 0.6s ease 3; }
+  </style>
+</head>
+<body>
+<div class="overlay" id="overlay"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><h1>Smart Mess</h1><span>Management System</span></div>
+  <nav class="sidebar-nav">
+    <span class="nav-section">Main</span>
+    <a href="../index.html" class="nav-link"><span class="icon">🏠</span> Dashboard</a>
+    <a href="menu.html" class="nav-link"><span class="icon">🍽️</span> Mess Menu</a>
+    <a href="attendance.html" class="nav-link"><span class="icon">✅</span> Attendance</a>
+    <span class="nav-section">Features</span>
+    <a href="feedback.html" class="nav-link"><span class="icon">💬</span> Feedback</a>
+    <a href="queue.html" class="nav-link"><span class="icon">⏱️</span> Queue</a>
+    <a href="chart.html" class="nav-link"><span class="icon">📊</span> Analytics</a>
+    <a href="game.html" class="nav-link active"><span class="icon">🎮</span> Rewards</a>
+  </nav>
+  <div class="sidebar-footer"><p>Team Quantum · ByteBurst'25</p></div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:14px">
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+      <span class="topbar-title">Rewards</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-date" id="topbar-date"></span>
+      <div class="avatar">S</div>
+    </div>
+  </header>
+
+  <div class="page-content">
+    <div class="page-heading">Spin & Win 🎡</div>
+    <p class="page-sub">Give feedback or mark attendance to earn spins. Win mess rewards!</p>
+
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:start" id="game-grid">
+
+      <!-- Wheel -->
+      <div class="card" style="text-align:center;padding:32px">
+        <div class="wheel-pointer"></div>
+        <canvas id="wheelCanvas" width="300" height="300"></canvas>
+
+        <div id="wheel-result" style="margin:20px 0 8px;font-size:1.2rem;font-family:'Playfair Display',serif;font-weight:700;color:var(--primary);min-height:32px"></div>
+
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
+          <span style="font-size:0.85rem;color:var(--text-2)">Spins left today:</span>
+          <span class="badge badge-orange" id="spins-left">3</span>
+        </div>
+
+        <button class="btn btn-primary" id="spin-btn" style="font-size:1rem;padding:14px 36px">
+          🎰 Spin Now
+        </button>
+        <p style="font-size:0.75rem;color:var(--text-3);margin-top:12px">Click the wheel or button to spin</p>
+      </div>
+
+      <!-- Right panel -->
+      <div style="display:flex;flex-direction:column;gap:20px">
+
+        <!-- How to earn spins -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">Earn More Spins</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="prize-card">
+              <span class="prize-icon">💬</span>
+              <div>
+                <div style="font-weight:600">Submit Feedback</div>
+                <div style="font-size:0.78rem;color:var(--text-2)">+1 spin per feedback</div>
+              </div>
+              <a href="feedback.html" class="btn btn-sm btn-ghost" style="margin-left:auto">Go →</a>
+            </div>
+            <div class="prize-card">
+              <span class="prize-icon">✅</span>
+              <div>
+                <div style="font-weight:600">Mark Attendance</div>
+                <div style="font-size:0.78rem;color:var(--text-2)">+1 spin per daily check-in</div>
+              </div>
+              <a href="attendance.html" class="btn btn-sm btn-ghost" style="margin-left:auto">Go →</a>
+            </div>
+            <div class="prize-card">
+              <span class="prize-icon">⭐</span>
+              <div>
+                <div style="font-weight:600">Rate Dishes</div>
+                <div style="font-size:0.78rem;color:var(--text-2)">+1 spin per rating session</div>
+              </div>
+              <a href="menu.html" class="btn btn-sm btn-ghost" style="margin-left:auto">Go →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Win history -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div class="card-title">Your Wins</div>
+            <button class="btn btn-sm btn-secondary" id="clear-wins">Clear</button>
+          </div>
+          <div id="wins-list" style="display:flex;flex-direction:column;gap:8px"></div>
+          <div class="empty-state" id="wins-empty">
+            <div class="emoji">🏆</div><p>No wins yet — spin to win!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="../js/shared.js"></script>
+<script>
+const PRIZES = [
+  { label: 'Free Sweet 🍬',     color: '#f9c74f' },
+  { label: 'Skip Queue ⚡',     color: '#f9844a' },
+  { label: 'Free Meal 🍛',      color: '#c45c26' },
+  { label: 'Front Seat 🪑',     color: '#577590' },
+  { label: 'Extra Chapati 🫓',  color: '#43aa8b' },
+  { label: 'Free Salad 🥗',     color: '#90be6d' }
+];
+const N = PRIZES.length;
+const canvas = document.getElementById('wheelCanvas');
+const ctx    = canvas.getContext('2d');
+let   angle  = 0;
+let   spinning = false;
+
+function drawWheel(rotation) {
+  ctx.clearRect(0, 0, 300, 300);
+  const cx = 150, cy = 150, r = 145;
+  const slice = (Math.PI * 2) / N;
+
+  for (let i = 0; i < N; i++) {
+    const start = rotation + i * slice;
+    const end   = start + slice;
+
+    // Slice
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, end);
+    ctx.closePath();
+    ctx.fillStyle = PRIZES[i].color;
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Label
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(start + slice / 2);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px DM Sans, sans-serif';
+    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+    ctx.shadowBlur = 2;
+    ctx.fillText(PRIZES[i].label, r - 10, 4);
+    ctx.restore();
+  }
+
+  // Center circle
+  ctx.beginPath();
+  ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.strokeStyle = '#e8ddd4';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.fillStyle = '#c45c26';
+  ctx.font = 'bold 10px DM Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('SPIN', cx, cy + 4);
+}
+
+drawWheel(0);
+canvas.addEventListener('click', () => spin());
+document.getElementById('spin-btn').addEventListener('click', () => spin());
+
+function getSpinsLeft() {
+  const key  = `spins-${todayIST()}`;
+  const used = Store.get(key) || 0;
+  return Math.max(0, 3 - used);
+}
+function useASpin() {
+  const key  = `spins-${todayIST()}`;
+  const used = Store.get(key) || 0;
+  Store.set(key, used + 1);
+}
+function updateSpinsUI() {
+  document.getElementById('spins-left').textContent = getSpinsLeft();
+  document.getElementById('spin-btn').disabled = getSpinsLeft() === 0 || spinning;
+}
+
+function spin() {
+  if (spinning) return;
+  if (getSpinsLeft() === 0) { showToast('No spins left today! Earn more by giving feedback 💬'); return; }
+  spinning = true;
+  document.getElementById('wheel-result').textContent = '';
+  document.getElementById('spin-btn').disabled = true;
+
+  const extra    = Math.random() * 360;
+  const totalDeg = 1800 + extra;
+  const totalRad = (totalDeg * Math.PI) / 180;
+  const duration = 4000;
+  const start    = performance.now();
+  const startA   = angle;
+
+  function animate(now) {
+    const elapsed = now - start;
+    const progress= Math.min(elapsed / duration, 1);
+    const ease    = 1 - Math.pow(1 - progress, 3);
+    angle = startA + totalRad * ease;
+    drawWheel(angle);
+    if (progress < 1) { requestAnimationFrame(animate); return; }
+
+    // Figure out prize
+    const slice   = (Math.PI * 2) / N;
+    const norm    = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const pointer = (Math.PI * 2) - norm; // pointer points up (π*3/2 ≡ top)
+    const idx     = Math.floor(((pointer + slice / 2) % (Math.PI * 2)) / slice) % N;
+    const prize   = PRIZES[idx].label;
+
+    document.getElementById('wheel-result').textContent = `You won: ${prize}!`;
+    const resultEl = document.getElementById('wheel-result');
+    resultEl.classList.remove('pulse');
+    void resultEl.offsetWidth;
+    resultEl.classList.add('pulse');
+
+    // Save win
+    const wins = Store.get('wheel-wins') || [];
+    wins.push({ prize, time: getIST(), date: todayIST() });
+    Store.set('wheel-wins', wins);
+
+    useASpin();
+    spinning = false;
+    updateSpinsUI();
+    renderWins();
+    showToast(`🎉 ${prize}`);
+  }
+  requestAnimationFrame(animate);
+}
+
+function renderWins() {
+  const list  = document.getElementById('wins-list');
+  const empty = document.getElementById('wins-empty');
+  const wins  = Store.get('wheel-wins') || [];
+  list.innerHTML = '';
+  if (!wins.length) { empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  [...wins].reverse().slice(0,6).forEach(w => {
+    const el = document.createElement('div');
+    el.className = 'prize-card';
+    el.innerHTML = `
+      <span class="prize-icon">🏆</span>
+      <div>
+        <div style="font-weight:600;font-size:0.85rem">${w.prize}</div>
+        <div style="font-size:0.75rem;color:var(--text-3)">${w.date} · ${w.time}</div>
+      </div>
+      <span class="won-badge">WON</span>`;
+    list.appendChild(el);
+  });
+}
+
+document.getElementById('clear-wins').addEventListener('click', () => {
+  Store.set('wheel-wins', []);
+  renderWins();
+  showToast('Win history cleared');
+});
+
+function responsive() {
+  const g = document.getElementById('game-grid');
+  g.style.gridTemplateColumns = window.innerWidth < 900 ? '1fr' : 'auto 1fr';
+}
+window.addEventListener('resize', responsive);
+responsive();
+updateSpinsUI();
+renderWins();
+</script>
+</body>
+</html>

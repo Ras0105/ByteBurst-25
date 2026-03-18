@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Mess — Analytics</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="overlay" id="overlay"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><h1>Smart Mess</h1><span>Management System</span></div>
+  <nav class="sidebar-nav">
+    <span class="nav-section">Main</span>
+    <a href="../index.html" class="nav-link"><span class="icon">🏠</span> Dashboard</a>
+    <a href="menu.html" class="nav-link"><span class="icon">🍽️</span> Mess Menu</a>
+    <a href="attendance.html" class="nav-link"><span class="icon">✅</span> Attendance</a>
+    <span class="nav-section">Features</span>
+    <a href="feedback.html" class="nav-link"><span class="icon">💬</span> Feedback</a>
+    <a href="queue.html" class="nav-link"><span class="icon">⏱️</span> Queue</a>
+    <a href="chart.html" class="nav-link active"><span class="icon">📊</span> Analytics</a>
+    <a href="game.html" class="nav-link"><span class="icon">🎮</span> Rewards</a>
+  </nav>
+  <div class="sidebar-footer"><p>Team Quantum · ByteBurst'25</p></div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:14px">
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+      <span class="topbar-title">Analytics</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-date" id="topbar-date"></span>
+      <div class="avatar">S</div>
+    </div>
+  </header>
+
+  <div class="page-content">
+    <div class="page-heading">Data & Analytics</div>
+    <p class="page-sub">Insights on meal attendance, dish ratings, and feedback trends.</p>
+
+    <!-- Summary stats -->
+    <div class="stats-grid" style="margin-bottom:24px">
+      <div class="stat-card">
+        <div class="stat-icon orange">🍽️</div>
+        <div class="stat-value" id="a-total-att">0</div>
+        <div class="stat-label">Total Attendance Responses</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">💬</div>
+        <div class="stat-value" id="a-total-fb">0</div>
+        <div class="stat-label">Total Feedbacks</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">⭐</div>
+        <div class="stat-value" id="a-avg-rating">—</div>
+        <div class="stat-label">Avg. Feedback Rating</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon pink">📉</div>
+        <div class="stat-value" id="a-opt-rate">—</div>
+        <div class="stat-label">Opt-Out Rate</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px" id="charts-top">
+      <!-- Attendance by Meal -->
+      <div class="card">
+        <div class="card-title">Attendance by Meal (Today)</div>
+        <div class="card-sub">Will Eat vs Opted Out</div>
+        <canvas id="chart-att" height="200"></canvas>
+        <div class="empty-state" id="chart-att-empty" style="display:none">
+          <div class="emoji">📊</div><p>No attendance data yet</p>
+        </div>
+      </div>
+
+      <!-- Feedback by Type -->
+      <div class="card">
+        <div class="card-title">Feedback by Type</div>
+        <div class="card-sub">Distribution of feedback categories</div>
+        <canvas id="chart-fb" height="200"></canvas>
+        <div class="empty-state" id="chart-fb-empty" style="display:none">
+          <div class="emoji">💬</div><p>No feedback data yet</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dish Ratings -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px">
+        <div>
+          <div class="card-title">Top-Rated Dishes</div>
+          <div class="card-sub">Based on student ratings</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select class="form-control" id="rating-day" style="width:140px;padding:8px">
+            <option value="">All Days</option>
+            <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+            <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+          </select>
+          <select class="form-control" id="rating-meal" style="width:140px;padding:8px">
+            <option value="">All Meals</option>
+            <option>Breakfast</option><option>Lunch</option><option>Snacks</option><option>Dinner</option>
+          </select>
+        </div>
+      </div>
+      <canvas id="chart-dishes" height="140"></canvas>
+      <div class="empty-state" id="chart-dishes-empty" style="display:none">
+        <div class="emoji">⭐</div><p>Rate dishes in the Menu page to see rankings here</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="../js/shared.js"></script>
+<script>
+const MEALS    = ['Breakfast','Lunch','Snacks','Dinner'];
+const COLORS   = ['#c45c26','#3a6b4a','#e8855a','#5a9b6a','#9a3e16','#1e5c34'];
+let attChart, fbChart, dishChart;
+
+function loadStats() {
+  const today   = todayIST();
+  let totAtt = 0;
+  let eating = 0, opted = 0;
+  MEALS.forEach(m => {
+    const d = Store.get(`att-${today}-${m}`) || [];
+    totAtt += d.length;
+    eating += d.filter(x=>x.status==='Will Eat').length;
+    opted  += d.filter(x=>x.status==='Opted Out').length;
+  });
+  document.getElementById('a-total-att').textContent = totAtt;
+
+  const fbs = Store.get('feedbacks') || [];
+  document.getElementById('a-total-fb').textContent = fbs.length;
+  const ratings = fbs.filter(f=>f.rating>0);
+  const avgR    = ratings.length ? (ratings.reduce((s,f)=>s+f.rating,0)/ratings.length).toFixed(1) : '—';
+  document.getElementById('a-avg-rating').textContent = avgR === '—' ? avgR : `${avgR}★`;
+  const optRate = totAtt > 0 ? `${Math.round((opted/totAtt)*100)}%` : '—';
+  document.getElementById('a-opt-rate').textContent = optRate;
+
+  renderAttChart(eating, opted);
+  renderFbChart(fbs);
+  renderDishChart();
+}
+
+function renderAttChart(eating, opted) {
+  const ctx   = document.getElementById('chart-att');
+  const empty = document.getElementById('chart-att-empty');
+  if (eating === 0 && opted === 0) {
+    ctx.style.display = 'none'; empty.style.display = 'block'; return;
+  }
+  ctx.style.display = ''; empty.style.display = 'none';
+  if (attChart) attChart.destroy();
+
+  // Per-meal data
+  const today  = todayIST();
+  const labels = MEALS;
+  const eatArr = MEALS.map(m => (Store.get(`att-${today}-${m}`)||[]).filter(x=>x.status==='Will Eat').length);
+  const optArr = MEALS.map(m => (Store.get(`att-${today}-${m}`)||[]).filter(x=>x.status==='Opted Out').length);
+
+  attChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Will Eat', data: eatArr, backgroundColor: '#3a6b4a', borderRadius: 6 },
+        { label: 'Opted Out', data: optArr, backgroundColor: '#c45c26', borderRadius: 6 }
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  });
+}
+
+function renderFbChart(fbs) {
+  const ctx   = document.getElementById('chart-fb');
+  const empty = document.getElementById('chart-fb-empty');
+  if (!fbs.length) {
+    ctx.style.display = 'none'; empty.style.display = 'block'; return;
+  }
+  ctx.style.display = ''; empty.style.display = 'none';
+  if (fbChart) fbChart.destroy();
+
+  const types = {};
+  fbs.forEach(f => { types[f.type] = (types[f.type]||0) + 1; });
+  const labels = Object.keys(types);
+  const data   = Object.values(types);
+
+  fbChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: COLORS, borderWidth: 0 }] },
+    options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } }, cutout: '60%' }
+  });
+}
+
+function renderDishChart() {
+  const ctx   = document.getElementById('chart-dishes');
+  const empty = document.getElementById('chart-dishes-empty');
+  const rDay  = document.getElementById('rating-day').value;
+  const rMeal = document.getElementById('rating-meal').value;
+  const saved = Store.get('menuRatings') || {};
+
+  const dishes = {};
+  const days   = rDay ? [rDay] : Object.keys(MENU);
+  const meals  = rMeal ? [rMeal] : MEALS;
+  days.forEach(d => {
+    meals.forEach(m => {
+      const items = MENU[d]?.[m] || [];
+      items.forEach(item => {
+        const r = saved?.[d]?.[m]?.[item];
+        if (r > 0) {
+          if (!dishes[item]) dishes[item] = { total: 0, count: 0 };
+          dishes[item].total += r;
+          dishes[item].count += 1;
+        }
+      });
+    });
+  });
+
+  const entries = Object.entries(dishes)
+    .map(([name, v]) => ({ name, avg: (v.total/v.count) }))
+    .sort((a,b) => b.avg - a.avg)
+    .slice(0, 10);
+
+  if (!entries.length) {
+    ctx.style.display = 'none'; empty.style.display = 'block'; return;
+  }
+  ctx.style.display = ''; empty.style.display = 'none';
+  if (dishChart) dishChart.destroy();
+
+  dishChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: entries.map(e => e.name),
+      datasets: [{ label: 'Avg Rating', data: entries.map(e => e.avg.toFixed(1)), backgroundColor: COLORS[0], borderRadius: 6 }]
+    },
+    options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } }, scales: { x: { min: 0, max: 5, ticks: { stepSize: 1 } }, y: { grid: { display: false } } } }
+  });
+}
+
+document.getElementById('rating-day').addEventListener('change', renderDishChart);
+document.getElementById('rating-meal').addEventListener('change', renderDishChart);
+
+function responsive() {
+  const g = document.getElementById('charts-top');
+  g.style.gridTemplateColumns = window.innerWidth < 900 ? '1fr' : '1fr 1fr';
+}
+window.addEventListener('resize', responsive);
+responsive();
+
+document.addEventListener('DOMContentLoaded', loadStats);
+</script>
+</body>
+</html>

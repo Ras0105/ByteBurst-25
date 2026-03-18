@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Mess — Queue</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+<div class="overlay" id="overlay"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><h1>Smart Mess</h1><span>Management System</span></div>
+  <nav class="sidebar-nav">
+    <span class="nav-section">Main</span>
+    <a href="../index.html" class="nav-link"><span class="icon">🏠</span> Dashboard</a>
+    <a href="menu.html" class="nav-link"><span class="icon">🍽️</span> Mess Menu</a>
+    <a href="attendance.html" class="nav-link"><span class="icon">✅</span> Attendance</a>
+    <span class="nav-section">Features</span>
+    <a href="feedback.html" class="nav-link"><span class="icon">💬</span> Feedback</a>
+    <a href="queue.html" class="nav-link active"><span class="icon">⏱️</span> Queue</a>
+    <a href="chart.html" class="nav-link"><span class="icon">📊</span> Analytics</a>
+    <a href="game.html" class="nav-link"><span class="icon">🎮</span> Rewards</a>
+  </nav>
+  <div class="sidebar-footer"><p>Team Quantum · ByteBurst'25</p></div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:14px">
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+      <span class="topbar-title">Queue Management</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-date" id="topbar-date"></span>
+      <div class="avatar">S</div>
+    </div>
+  </header>
+
+  <div class="page-content">
+    <div class="page-heading">Serving Queue</div>
+    <p class="page-sub">Students with urgent class schedules are prioritized automatically.</p>
+
+    <div style="display:grid;grid-template-columns:380px 1fr;gap:24px" id="q-grid">
+
+      <!-- Form -->
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">Join the Queue</div>
+          <div class="card-sub">Fill in your details below</div>
+          <form id="queue-form">
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input type="date" id="q-date" class="form-control" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Your Name</label>
+              <input type="text" id="q-name" class="form-control" placeholder="Enter your name" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Priority</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px">
+                <label id="lbl-urgent" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:8px;border:2px solid var(--primary);background:var(--primary);color:#fff;cursor:pointer;font-weight:600;font-size:0.82rem;transition:all 0.2s">
+                  <input type="radio" name="urgency" value="urgent" checked style="display:none"/> ⚡ Have Class
+                </label>
+                <label id="lbl-normal" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:8px;border:2px solid var(--border);background:var(--surface);color:var(--text-2);cursor:pointer;font-weight:600;font-size:0.82rem;transition:all 0.2s">
+                  <input type="radio" name="urgency" value="normal" style="display:none"/> 😌 No Rush
+                </label>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%">Join Queue</button>
+          </form>
+        </div>
+
+        <!-- Legend -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">How it works</div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:0.83rem;color:var(--text-2)">
+            <div style="display:flex;align-items:flex-start;gap:10px">
+              <span style="font-size:1.1rem">⚡</span>
+              <span><strong style="color:var(--text)">Priority:</strong> Students with upcoming classes are served first. Their token appears at the top with a colored border.</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px">
+              <span style="font-size:1.1rem">😌</span>
+              <span><strong style="color:var(--text)">Normal:</strong> No class soon — you'll be served after priority students.</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px">
+              <span style="font-size:1.1rem">🔄</span>
+              <span>Queue resets daily. Change the date to view previous queues.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Queue display -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div>
+            <div class="card-title">Today's Queue</div>
+            <div class="card-sub" id="q-label">Loading...</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="badge badge-orange" id="q-count">0 in queue</span>
+            <button class="btn btn-sm btn-secondary" id="q-clear">Clear</button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:16px;margin-bottom:20px">
+          <div style="padding:12px 18px;background:var(--surface-2);border-radius:8px;text-align:center;flex:1">
+            <div style="font-size:1.3rem;font-weight:700;color:var(--primary)" id="q-urgent-count">0</div>
+            <div style="font-size:0.75rem;color:var(--text-2);margin-top:2px">⚡ Priority</div>
+          </div>
+          <div style="padding:12px 18px;background:var(--surface-2);border-radius:8px;text-align:center;flex:1">
+            <div style="font-size:1.3rem;font-weight:700;color:var(--accent)" id="q-normal-count">0</div>
+            <div style="font-size:0.75rem;color:var(--text-2);margin-top:2px">😌 Normal</div>
+          </div>
+        </div>
+
+        <div class="queue-list" id="queue-list"></div>
+        <div class="empty-state" id="q-empty">
+          <div class="emoji">⏱️</div>
+          <p>Queue is empty. Be the first to join!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="../js/shared.js"></script>
+<script>
+document.getElementById('q-date').value = todayIST();
+
+// Toggle visuals
+document.querySelectorAll('input[name="urgency"]').forEach(r => {
+  r.addEventListener('change', function() {
+    const lu = document.getElementById('lbl-urgent');
+    const ln = document.getElementById('lbl-normal');
+    if (this.value === 'urgent') {
+      lu.style.cssText += 'border-color:var(--primary);background:var(--primary);color:#fff';
+      ln.style.cssText += 'border-color:var(--border);background:var(--surface);color:var(--text-2)';
+    } else {
+      ln.style.cssText += 'border-color:var(--accent);background:var(--accent);color:#fff';
+      lu.style.cssText += 'border-color:var(--border);background:var(--surface);color:var(--text-2)';
+    }
+  });
+});
+
+document.getElementById('queue-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const date    = document.getElementById('q-date').value;
+  const name    = document.getElementById('q-name').value.trim();
+  const urgency = document.querySelector('input[name="urgency"]:checked').value;
+  if (!date || !name) return;
+
+  const key  = `queue-${date}`;
+  let   data = Store.get(key) || [];
+  // Prevent duplicate
+  if (data.find(d => d.name.toLowerCase() === name.toLowerCase())) {
+    showToast('You are already in the queue!');
+    return;
+  }
+  data.push({ name, urgency, time: getIST() });
+  Store.set(key, data);
+  e.target.reset();
+  document.getElementById('q-date').value = todayIST();
+  renderQueue();
+  showToast(urgency === 'urgent' ? '⚡ Added with priority!' : '✅ Added to queue!');
+});
+
+document.getElementById('q-clear').addEventListener('click', () => {
+  const date = document.getElementById('q-date').value || todayIST();
+  if (confirm('Clear the queue for this date?')) {
+    Store.set(`queue-${date}`, []);
+    renderQueue();
+    showToast('Queue cleared');
+  }
+});
+
+document.getElementById('q-date').addEventListener('change', renderQueue);
+
+function renderQueue() {
+  const date   = document.getElementById('q-date').value || todayIST();
+  const key    = `queue-${date}`;
+  const raw    = Store.get(key) || [];
+  const sorted = [...raw.filter(d=>d.urgency==='urgent'), ...raw.filter(d=>d.urgency!=='urgent')];
+  const list   = document.getElementById('queue-list');
+  const empty  = document.getElementById('q-empty');
+
+  document.getElementById('q-label').textContent    = date;
+  document.getElementById('q-count').textContent    = `${raw.length} in queue`;
+  document.getElementById('q-urgent-count').textContent = raw.filter(d=>d.urgency==='urgent').length;
+  document.getElementById('q-normal-count').textContent = raw.filter(d=>d.urgency!=='urgent').length;
+
+  list.innerHTML = '';
+  if (!sorted.length) { empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  sorted.forEach((person, i) => {
+    const el = document.createElement('div');
+    el.className = 'queue-item' + (person.urgency==='urgent' ? ' urgent' : '');
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="queue-num">${i+1}</div>
+        <div>
+          <div style="font-weight:600;font-size:0.9rem">${person.name}</div>
+          <div style="font-size:0.75rem;color:var(--text-3)">${person.time||''}</div>
+        </div>
+      </div>
+      <span class="badge ${person.urgency==='urgent'?'badge-orange':'badge-green'}">${person.urgency==='urgent'?'⚡ Priority':'😌 Normal'}</span>`;
+    list.appendChild(el);
+  });
+}
+
+function responsive() {
+  const g = document.getElementById('q-grid');
+  g.style.gridTemplateColumns = window.innerWidth < 900 ? '1fr' : '380px 1fr';
+}
+window.addEventListener('resize', responsive);
+responsive();
+renderQueue();
+</script>
+</body>
+</html>
